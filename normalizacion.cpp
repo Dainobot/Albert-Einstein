@@ -7,7 +7,7 @@ using namespace std;
 void mostrarMozos() {
     FILE* f = fopen("datos/mozos.dat", "rb"); // O "datos/mozos.dat" según donde lo guardaste
     if (!f) {
-        cout << "No se pudo abrir mozos.dat" << endl;
+        cout << "No se pudo abrir mozos.dat" << endl; // BORRAR LUEGO:::::::
         return;
     }
 
@@ -31,6 +31,42 @@ void encriptarPassword(const char* passOriginal, char* passDestino, int k) {
         i++;
     }
     passDestino[i] = '\0';
+}
+
+void actualizarStock() {
+    FILE* fHistoricas = fopen("datos/comandas_historicas.dat", "rb");
+    if (!fHistoricas) {
+        cout << "ERROR: No se pudo abrir comandas_historicas.dat" << endl;
+        return;
+    }
+
+    FILE* fInventario = fopen("datos/inventario.dat", "rb+");
+    if (!fInventario) {
+        cout << "ERROR: No se pudo abrir inventario.dat" << endl;
+        fclose(fHistoricas);
+        return;
+    }
+
+    ComandaHistorica comanda;
+    Producto prod;
+
+    while (fread(&comanda, sizeof(ComandaHistorica), 1, fHistoricas) == 1) {
+        rewind(fInventario);
+
+        while (fread(&prod, sizeof(Producto), 1, fInventario) == 1) {
+            if (prod.codigo == comanda.codigoProducto) {
+                prod.stockActual -= comanda.cantidad;
+
+                fseek(fInventario, -sizeof(Producto), SEEK_CUR);
+                fwrite(&prod, sizeof(Producto), 1, fInventario);
+                break;
+            }
+        }
+    }
+
+    fclose(fHistoricas);
+    fclose(fInventario);
+    cout << "[Tarea Stock] inventario.dat actualizado correctamente." << endl;
 }
 
 int buscarMozoPorNombre(const Mozo mozos[], int cantMozos, const char* nombre) {
@@ -88,5 +124,9 @@ int generarArchivoMozos (Mozo mozos[], int maxMozos){
 int main() {
     Mozo listaMozos[100];
     int cantMozos = generarArchivoMozos(listaMozos, 100);
-    mostrarMozos();
+    if (cantMozos > 0){
+        mostrarMozos();
+        actualizarStock();
+    }  
+    return 0;
 }
