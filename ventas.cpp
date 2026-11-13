@@ -33,13 +33,49 @@ void pedirFecha(char fecha[]) {
     while (!ok) {
         cout << "Fecha del dia (DD-MM-AAAA): ";
         cin >> texto;
-        if (strlen(texto) == 10 && texto[2] == '-' && texto[5] == '-') {
+
+        int largo = 0;
+        while (texto[largo] != '\0') {
+            largo++;
+        }
+
+        if (largo == 10 && texto[2] == '-' && texto[5] == '-') {
             strcpy(fecha, texto);
             ok = true;
         } else {
             cout << "Formato incorrecto, ejemplo: 03-06-2025" << endl;
         }
     }
+}
+
+// Arma "datos/comandas_DD-MM-AAAA.dat" copiando caracter por caracter
+void armarNombreArchivo(char fecha[], char nombreArchivo[]) {
+    char inicio[] = "datos/comandas_";
+    char fin[] = ".dat";
+    int i = 0;
+    int j = 0;
+
+    while (inicio[j] != '\0') {
+        nombreArchivo[i] = inicio[j];
+        i++;
+        j++;
+    }
+
+    j = 0;
+    while (fecha[j] != '\0') {
+        nombreArchivo[i] = fecha[j];
+        i++;
+        j++;
+    }
+
+    j = 0;
+    while (fin[j] != '\0') {
+        nombreArchivo[i] = fin[j];
+        i++;
+        j++;
+    }
+
+    nombreArchivo[i] = '\0';
 }
 
 // Si la planilla del dia no existe la crea (con "ab" si ya existe no se pisa nada)
@@ -206,7 +242,7 @@ int main() {
     char nombreArchivo[60];
 
     pedirFecha(fecha);
-    sprintf(nombreArchivo, "datos/comandas_%s.dat", fecha);
+    armarNombreArchivo(fecha, nombreArchivo);
     crearPlanillaSiNoExiste(nombreArchivo);
 
     int opcion = -1;
